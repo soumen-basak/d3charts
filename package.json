@@ -1,0 +1,29 @@
+{
+  "name": "d3charts",
+  "version": "1.0.0",
+  "description": "Evaluation project for Petasense",
+  "main": "nodeserver.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/soumen-basak/d3charts.git"
+  },
+  "keywords": [
+    "d3charts"
+  ],
+  "author": "soumen.basak@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/soumen-basak/d3charts/issues"
+  },
+  "homepage": "",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "fs": "0.0.1-security",
+    "fs-extra": "^0.29.0",
+    "tracer": "^0.8.15"
+  },
+  "devDependencies": {},
+  "optionalDependencies": {}
+}
