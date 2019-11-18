@@ -14,8 +14,8 @@ var yScale = d3.scaleLinear().range([height, 0]);
 var color = d3.scaleOrdinal().range(d3.schemeCategory10);
 
 // Define axes
-var xAxis = d3.axisBottom().scale(xScale).tickFormat(d3.timeFormat("%e")).tickSize(-height);
-var yAxis = d3.axisLeft().scale(yScale).tickFormat(d3.format("." + d3.precisionFixed(0.01) + "f")).tickSize(-width);
+var xAxis = d3.axisBottom().scale(xScale).tickFormat(d3.timeFormat("%e")).tickSize(-height).tickPadding(12);
+var yAxis = d3.axisLeft().scale(yScale).tickFormat(d3.format("." + d3.precisionFixed(0.01) + "f")).tickSize(-width).tickPadding(12);
 
 // Define lines
 var line = d3
@@ -82,15 +82,53 @@ d3.csv("giniLine.csv").then(function (data) {
     svg.append("text")
         .attr("x", 25 - margin.left)
         .attr("y", 20 - margin.top)
-        .style("text-anchor", "left")
+        .attr("fill", "#333")
+        .attr('font-size', '18')
+        .style("text-anchor", "beginning")
         .text("Multiline radial of all locations");
 
     // Add Chart background label
     svg.append("text")
         .attr("x", 25)
-        .attr("y", 25)
-        .style("text-anchor", "left")
+        .attr("y", 45)
+        .attr("fill", "#eee")
+        .attr('font-size', '24')
+        .attr('font-weight', 'bold')
+        .style("text-anchor", "beginning")
         .text("Trend");
+
+    // Add icon
+    svg.append("text")
+        .attr("x", width)
+        .attr("y", 20 - margin.top)
+        .attr("class", "fas fa-ellipsis-v")
+        .attr("fill", "#999")
+        .attr("font-size", "0.8rem")
+        .style("text-anchor", "end")
+        .text(function (d) { return '\uf142\uf142' });
+    svg.append("text")
+        .attr("x", width - 30)
+        .attr("y", 20 - margin.top)
+        .attr("class", "fas fa-expand")
+        .attr("fill", "#999")
+        .style("text-anchor", "end")
+        .text(function (d) { return '\uf065' });
+    svg.append("text")
+        .attr("x", width - 63)
+        .attr("y", 20 - margin.top)
+        .attr("class", "fas fa-ellipsis-v")
+        .attr("fill", "#999")
+        .style("text-anchor", "end")
+        .text(function (d) { return '\uf142' });
+    svg.append("text")
+        .attr("x", width - 90)
+        .attr("y", 20 - margin.top)
+        .attr("class", "far fa-calendar")
+        .attr("fill", "#999")
+        .attr('cursor', 'pointer')
+        .style("text-anchor", "end")
+        .text(function (d) { return '\uf133' })
+        .on('click', handleCalendarClick);
 
     // Place the axes on the chart
     svg.append("g")
@@ -115,6 +153,9 @@ d3.csv("giniLine.csv").then(function (data) {
         .attr("y", 25 - margin.left)
         .attr("x", 0 - (height / 2))
         .attr("dy", "1em")
+        .attr("fill", "#999")
+        .attr('font-size', '14')
+        .attr('font-weight', 'bold')
         .style("text-anchor", "middle")
         .text("Amplitude (mm/s)");
 
@@ -140,6 +181,11 @@ d3.csv("giniLine.csv").then(function (data) {
     console.log(concentrations);
     // console.log(concentrations.map(function()))
 });
+
+// Handle click on Calendar icon to change x axis time period
+function handleCalendarClick() {
+    alert("calendar clicked");
+}
 
 // Define responsive behavior
 function resize() {
