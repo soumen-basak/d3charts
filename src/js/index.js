@@ -1,9 +1,10 @@
+// Define month string
+monStr = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 // Define margins
 var margin = { top: 80, right: 50, bottom: 30, left: 100 },
-    width =
-        parseInt(d3.select("#chart").style("width")) - margin.left - margin.right,
-    height =
-        parseInt(d3.select("#chart").style("height")) - margin.top - margin.bottom;
+    width = parseInt(d3.select("#chart").style("width")) - margin.left - margin.right,
+    height = parseInt(d3.select("#chart").style("height")) - margin.top - margin.bottom;
 
 // Define date parser
 var parseDate = d3.timeParse("%Y-%m-%d %H:%M:%S");
@@ -20,13 +21,9 @@ var yAxis = d3.axisLeft().scale(yScale).tickFormat(d3.format("." + d3.precisionF
 // Define lines
 var line = d3
     .line()
-    .curve(d3.curveMonotoneX)
-    .x(function (d) {
-        return xScale(d["date"]);
-    })
-    .y(function (d) {
-        return yScale(d["concentration"]);
-    });
+    .curve(d3.curveNatural)
+    .x(function (d) { return xScale(d["date"]); })
+    .y(function (d) { return yScale(d["measurement"]); });
 
 // Define svg canvas
 var svg = d3
@@ -37,13 +34,13 @@ var svg = d3
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 // Read in data
-d3.csv("giniLine.csv").then(function (data) {
+d3.csv("multiLine.csv").then(function (data) {
 
     // Set the color domain equal to the three product categories
-    var productCategories = d3.keys(data[0]).filter(function (key) {
+    var measurementProperties = d3.keys(data[0]).filter(function (key) {
         return key !== "Date" && key !== "metric";
     });
-    color.domain(productCategories);
+    color.domain(measurementProperties);
 
     // Format the data field
     data.forEach(function (d) {
@@ -54,20 +51,18 @@ d3.csv("giniLine.csv").then(function (data) {
     var subset = data.filter(function (el) {
         return el.metric === "Amplitude";
     });
-    // console.log(JSON.stringify(subset, null, 2))
 
     // Reformat data to make it more copasetic for d3
     // data = An array of objects
-    // concentrations = An array of three objects, each of which contains an array of objects
-    var concentrations = productCategories.map(function (category) {
+    // measurements = An array of three objects, each of which contains an array of objects
+    var measurements = measurementProperties.map(function (property) {
         return {
-            category: category,
+            property: property,
             datapoints: subset.map(function (d) {
-                return { date: d["Date"], concentration: +d[category] };
+                return { date: d["Date"], measurement: +d[property] };
             })
         };
     });
-    // console.log(JSON.stringify(concentrations, null, 2)) // to view the structure
 
     // Set the domain of the axes
     xScale.domain(
@@ -138,14 +133,7 @@ d3.csv("giniLine.csv").then(function (data) {
 
     svg.append("g")
         .attr("class", "y axis")
-        .call(yAxis)
-        .append("text")
-        .attr("class", "label")
-        .attr("y", 6)
-        .attr("dy", ".71em")
-        .attr("dx", ".71em")
-        .style("text-anchor", "beginning")
-        .text("Product Concentration");
+        .call(yAxis);
 
     // Add text label for y axis
     svg.append("text")
@@ -159,32 +147,110 @@ d3.csv("giniLine.csv").then(function (data) {
         .style("text-anchor", "middle")
         .text("Amplitude (mm/s)");
 
-    var products = svg
-        .selectAll(".category")
-        .data(concentrations)
+    var radials = svg
+        .selectAll(".property")
+        .data(measurements)
         .enter()
         .append("g")
-        .attr("class", "category");
+        .attr("class", "property");
 
-    products
-        .append("path")
+    radials.append("path")
         .attr("class", "line")
-        .attr("d", function (d) {
-            return line(d.datapoints);
-        })
-        .style("stroke", function (d) {
-            return color(d.category);
-        });
+        .attr("d", function (d) { return line(d.datapoints); })
+        .style("stroke", function (d) { return color(d.property); });
 
-    // console.log(JSON.stringify(d3.values(concentrations), null, 2)) // to view the structure
-    console.log(d3.values(concentrations)); // to view the structure
-    console.log(concentrations);
-    // console.log(concentrations.map(function()))
+    // Make the Dynamic Date display
+    var ddisp = svg.append('g')
+        .attr('class', 'ddisp')
+        .attr('transform', 'translate(0,0)');
+
+    ddisp.append('text')
+        .attr('class', 'ddisp-text')
+        .attr('x', 0)
+        .attr("y", 20 - margin.top)
+        .attr("fill", "#333")
+        .attr('font-size', '14')
+        .text(formatDate(measurements[0].datapoints[0].date));
+
+    ddisp.attr('transform', function () {
+        return `translate(${(width - this.getBBox().width) / 2},${0})`
+    });
+
+    // Make the legend
+    var legend = svg.append('g')
+        .attr('class', 'legend')
+        .attr('transform', 'translate(0,0)');
+
+    var lg = legend.selectAll('g')
+        .data(measurements)
+        .enter()
+        .append('g')
+        .attr('transform', (d, i) => `translate(${i * 100},${- margin.top / 2})`);
+
+    lg.append('circle')
+        .style('fill', function (d) { return color(d.property); })
+        .attr('cx', 0)
+        .attr('cy', 0)
+        .attr('r', 3);
+
+    lg.append('text')
+        .attr('class', function (d) { return d.property })
+        .attr('x', 10)
+        .attr('y', 5)
+        .attr("fill", "#999")
+        .attr('font-size', '14')
+        .text(function (d) { return d.property + ": " + d.datapoints[0].measurement + " mm/s" });
+
+    var offset = 0;
+    lg.attr('transform', function (d, i) {
+        var x = offset;
+        offset += this.getBBox().width + 20;
+        return `translate(${x},${-margin.top / 2})`;
+    });
+
+    legend.attr('transform', function () {
+        return `translate(${(width - this.getBBox().width) / 2},${0})`
+    });
+
+    // Create a rect on top of the svg area: this rectangle recovers mouse position
+    svg
+        .append('rect')
+        .style("fill", "none")
+        .style("pointer-events", "all")
+        .attr('width', width)
+        .attr('height', height)
+        .on('mouseover', updatePropVal)
+        .on('mousemove',updatePropVal);
+
+    var bisectDate = d3.bisector(function (d, x) { return x - d.Date; }).right;
+
+    function updatePropVal() {
+        var x0 = xScale.invert(d3.mouse(this)[0] || 0);
+        var i = bisectDate(data, new Date(x0));
+        measurements.forEach(function (m) {
+            lg.selectAll('.' + m.property)
+                .html(m.property + ": " + data[i][m.property] + " mm/s");
+            ddisp.selectAll('.ddisp-text')
+                .html(formatDate(data[i].Date));
+        });
+    }
+
+    console.log(measurements); // to view the structure
+    console.log(data); // to view the structure
 });
 
 // Handle click on Calendar icon to change x axis time period
 function handleCalendarClick() {
     alert("calendar clicked");
+}
+
+function formatDate(date) {
+    var month = monStr[date.getMonth()] + " " + date.getDate();
+    var year = date.getFullYear();
+    var hrs = date.getHours();
+    var min = date.getMinutes();
+    var time = (hrs % 12 < 10 ? "0" + hrs % 12 : hrs % 12) + ":" + (min < 10 ? "0" + min : min) + (hrs >= 12 ? " PM" : " AM");
+    return month + ", " + year + " at " + time;
 }
 
 // Define responsive behavior
