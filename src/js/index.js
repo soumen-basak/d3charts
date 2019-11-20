@@ -1,5 +1,5 @@
-// Define month string
-monStr = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+// Define some constants
+var monStr = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 // Define margins
 var margin = { top: 80, right: 50, bottom: 30, left: 100 },
@@ -8,6 +8,7 @@ var margin = { top: 80, right: 50, bottom: 30, left: 100 },
 
 // Define date parser
 var parseDate = d3.timeParse("%Y-%m-%d %H:%M:%S");
+var formatDateTime = d3.timeFormat("%Y-%m-%d %H:%M:%S");
 
 // Define scales
 var xScale = d3.scaleTime().range([0, width]);
@@ -52,6 +53,13 @@ d3.csv("multiLine.csv").then(function (data) {
         return el.metric === "Amplitude";
     });
 
+    data.sort(function (a, b) {
+        return a.Date > b.Date
+    });
+
+    var start = data[0].Date;
+    var end = data[data.length - 1].Date;
+
     // Reformat data to make it more copasetic for d3
     // data = An array of objects
     // measurements = An array of three objects, each of which contains an array of objects
@@ -67,7 +75,9 @@ d3.csv("multiLine.csv").then(function (data) {
     // Set the domain of the axes
     xScale.domain(
         d3.extent(subset, function (d) {
-            return d["Date"];
+            if (d['Date'] >= end && d['Date'] <= start) {
+                return d["Date"];
+            }
         })
     );
 
@@ -156,7 +166,11 @@ d3.csv("multiLine.csv").then(function (data) {
 
     radials.append("path")
         .attr("class", "line")
-        .attr("d", function (d) { return line(d.datapoints); })
+        .attr("d", function (d) {
+            return line(d.datapoints.filter(function (datapoint) {
+                return datapoint.date >= end && datapoint.date <= start
+            }));
+        })
         .style("stroke", function (d) { return color(d.property); });
 
     // Make the Dynamic Date display
@@ -229,7 +243,7 @@ d3.csv("multiLine.csv").then(function (data) {
         var i = bisectDate(data, new Date(x0));
         measurements.forEach(function (m) {
             lg.selectAll('.' + m.property)
-                .html(m.property + ": " + Math.round(data[i][m.property]*100)/100 + " mm/s");
+                .html(m.property + ": " + Math.round(data[i][m.property] * 100) / 100 + " mm/s");
             ddisp.selectAll('.ddisp-text')
                 .html(formatDate(data[i].Date));
         });
@@ -237,71 +251,111 @@ d3.csv("multiLine.csv").then(function (data) {
 
     console.log(measurements); // to view the structure
     console.log(data); // to view the structure
-});
 
-// Handle click on Calendar icon to change x axis time period
-function handleCalendarClick() {
-    var popupElem = document.getElementById('calPopup');
-    var chartElem = document.getElementById('chartWrapper');
-    var rectIcon = this.getBoundingClientRect();
-    var rectPopup = popupElem.getBoundingClientRect();
-    var rectChart = chartElem.getBoundingClientRect();
-    popupElem.style.top = parseInt(rectIcon.top - rectChart.top + rectIcon.height + 10) + 'px';
-    popupElem.style.left = parseInt(rectIcon.right - rectChart.left - rectPopup.width) + 'px';
-    popupElem.classList.toggle('invisible');
-    popupElem.classList.toggle('transparent');
-};
+    // Handle click on Calendar icon to change x axis time period
+    function handleCalendarClick() {
+        var popupElem = document.getElementById('calPopup');
+        var chartElem = document.getElementById('chartWrapper');
+        var rectIcon = this.getBoundingClientRect();
+        var rectPopup = popupElem.getBoundingClientRect();
+        var rectChart = chartElem.getBoundingClientRect();
+        popupElem.style.top = parseInt(rectIcon.top - rectChart.top + rectIcon.height + 10) + 'px';
+        popupElem.style.left = parseInt(rectIcon.right - rectChart.left - rectPopup.width) + 'px';
+        popupElem.classList.toggle('invisible');
+        popupElem.classList.toggle('transparent');
+    };
 
-window.addEventListener('click', function (e) {
-    var popupElem = document.getElementById('calPopup');
-    if (!e.target.classList.contains('fa-calendar')) {
-        if (!popupElem.contains(e.target)) {
-            popupElem.classList.add('invisible');
-            popupElem.classList.add('transparent');
+    window.addEventListener('click', function (e) {
+        var popupElem = document.getElementById('calPopup');
+        if (!e.target.classList.contains('fa-calendar')) {
+            if (!popupElem.contains(e.target)) {
+                popupElem.classList.add('invisible');
+                popupElem.classList.add('transparent');
+            }
         }
-    }
-});
+    });
 
-// Handle clicks on time range to display in graph
+    // Handle clicks on time range to display in graph
+    var trangeElems = document.getElementsByClassName('time-range');
+    var handleCustomTimeRangeClick = function (ev) {
+        document.querySelector('.time-range.selected').classList.remove('selected');
+        this.classList.add('selected');
+        var customElem = document.getElementById('customDetailsDiv');
+        var popupElem = document.getElementById('calPopup');
+        if (this.getAttribute('id') === 'custom') {
+            customElem.classList.remove('d-none');
+            var rectCustom = customElem.getBoundingClientRect();
+            popupElem.style.left = (parseInt(popupElem.style.left.replace(/px/, "")) - rectCustom.width) + "px";;
+        } else {
+            var rectCustom = customElem.getBoundingClientRect();
+            customElem.classList.add('d-none');
+            popupElem.style.left = (parseInt(popupElem.style.left.replace(/px/, "")) + rectCustom.width) + "px";;
+        }
+        var dur = this.getAttribute("data-duration");
+        if (dur === "custom") {
+        } else if (dur === "all") {
+            start = data[0].Date;
+            end = data[data.length - 1].Date;
+        } else {
+            var duration = parseInt(dur) * 1000 * 3600 * 24;
+            end = parseDate(formatDateTime(new Date(start.getTime() - duration)));
+        }
+        // Update the axis and text with the new scale
+        xScale.domain(
+            d3.extent(subset, function (d) {
+                if (d['Date'] >= end && d['Date'] <= start) {
+                    return d["Date"];
+                }
+            })
+        );
+        svg.select(".x.axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
 
-var trangeElems = document.getElementsByClassName('time-range');
-var handleCustomTimeRangeClick = function (ev) {
-    document.querySelector('.time-range.selected').classList.remove('selected');
-    this.classList.add('selected');
-    var customElem = document.getElementById('customDetailsDiv');
-    var popupElem = document.getElementById('calPopup');
-    if (this.getAttribute('id') === 'custom') {
-        customElem.classList.remove('d-none');
-        var rectCustom = customElem.getBoundingClientRect();
-        popupElem.style.left = (parseInt(popupElem.style.left.replace(/px/, "")) - rectCustom.width) + "px";;
-    } else {
+        // Remove old plot
+        svg.selectAll(".property").remove();
+        // Update with new plot
+        var radials = svg
+            .selectAll(".property")
+            .data(measurements)
+            .enter()
+            .append("g")
+            .attr("class", "property");
+
+        radials.append("path")
+            .attr("class", "line")
+            .attr("d", function (d) {
+                return line(d.datapoints.filter(function (datapoint) {
+                    return datapoint.date >= end && datapoint.date <= start
+                }));
+            })
+            .style("stroke", function (d) { return color(d.property); });
+
+    };
+
+    document.getElementById('customClose').addEventListener('click', function (ev) {
+        var customElem = document.getElementById('customDetailsDiv');
+        var popupElem = document.getElementById('calPopup');
         var rectCustom = customElem.getBoundingClientRect();
         customElem.classList.add('d-none');
         popupElem.style.left = (parseInt(popupElem.style.left.replace(/px/, "")) + rectCustom.width) + "px";;
+    });
+
+    [].forEach.call(trangeElems, function (trange) {
+        trange.addEventListener('click', handleCustomTimeRangeClick);
+    });
+
+    // Format Date for display of date/time at cursor
+    function formatDate(date) {
+        var month = monStr[date.getMonth()] + " " + date.getDate();
+        var year = date.getFullYear();
+        var hrs = date.getHours();
+        var min = date.getMinutes();
+        var time = (hrs % 12 < 10 ? "0" + hrs % 12 : hrs % 12) + ":" + (min < 10 ? "0" + min : min) + (hrs >= 12 ? " PM" : " AM");
+        return month + ", " + year + " at " + time;
     }
-};
 
-document.getElementById('customClose').addEventListener('click', function (ev) {
-    var customElem = document.getElementById('customDetailsDiv');
-    var popupElem = document.getElementById('calPopup');
-    var rectCustom = customElem.getBoundingClientRect();
-    customElem.classList.add('d-none');
-    popupElem.style.left = (parseInt(popupElem.style.left.replace(/px/, "")) + rectCustom.width) + "px";;
 });
-
-[].forEach.call(trangeElems, function (trange) {
-    trange.addEventListener('click', handleCustomTimeRangeClick);
-});
-
-function formatDate(date) {
-    var month = monStr[date.getMonth()] + " " + date.getDate();
-    var year = date.getFullYear();
-    var hrs = date.getHours();
-    var min = date.getMinutes();
-    var time = (hrs % 12 < 10 ? "0" + hrs % 12 : hrs % 12) + ":" + (min < 10 ? "0" + min : min) + (hrs >= 12 ? " PM" : " AM");
-    return month + ", " + year + " at " + time;
-}
-
 // Define responsive behavior
 function resize() {
     var width =
@@ -314,10 +368,12 @@ function resize() {
     // Update the range of the scale with new width/height
     xScale.range([0, width]);
     yScale.range([height, 0]);
+    // Update axes
+    xAxis.tickSize(-height);
+    yAxis.tickSize(-width);
 
     // Update the axis and text with the new scale
-    svg
-        .select(".x.axis")
+    svg.select(".x.axis")
         .attr("transform", "translate(0," + height + ")")
         .call(xAxis);
 
@@ -337,3 +393,10 @@ d3.select(window).on("resize", resize);
 
 // Call the resize function
 resize();
+
+// Code to generate points from plotted graphs
+// path1 = document.querySelector('.property path');
+// pathLength = path1.getTotalLength()
+// for (i = 0; i<155; i++) {
+    // console.log(path1.getPointAtLength(pathLength*i/154));
+// }
