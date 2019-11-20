@@ -220,7 +220,7 @@ d3.csv("multiLine.csv").then(function (data) {
         .attr('width', width)
         .attr('height', height)
         .on('mouseover', updatePropVal)
-        .on('mousemove',updatePropVal);
+        .on('mousemove', updatePropVal);
 
     var bisectDate = d3.bisector(function (d, x) { return x - d.Date; }).right;
 
@@ -229,7 +229,7 @@ d3.csv("multiLine.csv").then(function (data) {
         var i = bisectDate(data, new Date(x0));
         measurements.forEach(function (m) {
             lg.selectAll('.' + m.property)
-                .html(m.property + ": " + data[i][m.property] + " mm/s");
+                .html(m.property + ": " + Math.round(data[i][m.property]*100)/100 + " mm/s");
             ddisp.selectAll('.ddisp-text')
                 .html(formatDate(data[i].Date));
         });
@@ -241,8 +241,57 @@ d3.csv("multiLine.csv").then(function (data) {
 
 // Handle click on Calendar icon to change x axis time period
 function handleCalendarClick() {
-    alert("calendar clicked");
-}
+    var popupElem = document.getElementById('calPopup');
+    var chartElem = document.getElementById('chartWrapper');
+    var rectIcon = this.getBoundingClientRect();
+    var rectPopup = popupElem.getBoundingClientRect();
+    var rectChart = chartElem.getBoundingClientRect();
+    popupElem.style.top = parseInt(rectIcon.top - rectChart.top + rectIcon.height + 10) + 'px';
+    popupElem.style.left = parseInt(rectIcon.right - rectChart.left - rectPopup.width) + 'px';
+    popupElem.classList.toggle('invisible');
+    popupElem.classList.toggle('transparent');
+};
+
+window.addEventListener('click', function (e) {
+    var popupElem = document.getElementById('calPopup');
+    if (!e.target.classList.contains('fa-calendar')) {
+        if (!popupElem.contains(e.target)) {
+            popupElem.classList.add('invisible');
+            popupElem.classList.add('transparent');
+        }
+    }
+});
+
+// Handle clicks on time range to display in graph
+
+var trangeElems = document.getElementsByClassName('time-range');
+var handleCustomTimeRangeClick = function (ev) {
+    document.querySelector('.time-range.selected').classList.remove('selected');
+    this.classList.add('selected');
+    var customElem = document.getElementById('customDetailsDiv');
+    var popupElem = document.getElementById('calPopup');
+    if (this.getAttribute('id') === 'custom') {
+        customElem.classList.remove('d-none');
+        var rectCustom = customElem.getBoundingClientRect();
+        popupElem.style.left = (parseInt(popupElem.style.left.replace(/px/, "")) - rectCustom.width) + "px";;
+    } else {
+        var rectCustom = customElem.getBoundingClientRect();
+        customElem.classList.add('d-none');
+        popupElem.style.left = (parseInt(popupElem.style.left.replace(/px/, "")) + rectCustom.width) + "px";;
+    }
+};
+
+document.getElementById('customClose').addEventListener('click', function (ev) {
+    var customElem = document.getElementById('customDetailsDiv');
+    var popupElem = document.getElementById('calPopup');
+    var rectCustom = customElem.getBoundingClientRect();
+    customElem.classList.add('d-none');
+    popupElem.style.left = (parseInt(popupElem.style.left.replace(/px/, "")) + rectCustom.width) + "px";;
+});
+
+[].forEach.call(trangeElems, function (trange) {
+    trange.addEventListener('click', handleCustomTimeRangeClick);
+});
 
 function formatDate(date) {
     var month = monStr[date.getMonth()] + " " + date.getDate();

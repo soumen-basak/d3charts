@@ -24,10 +24,10 @@
     <div class="row">
       <div id="chartWrapper" class="col bg-white py-4 px-0">
         <svg id="chart"></svg>
-        <div id="calPopup" class="px-4 py-2 bg-white shadow rounded position-absolute">
+        <div id="calPopup" class="px-4 py-2 bg-white shadow-lg rounded position-absolute transparent invisible">
           <div class="row flex-nowrap">
             <div class="col flex-fill">
-              <div class="row flex-nowrap align-items-center py-2">
+              <div id="1day" class="row time-range flex-nowrap align-items-center py-2">
                 <div class="col pr-1">
                   <div class="radio-inline"></div>
                 </div>
@@ -35,7 +35,7 @@
                   <div class="radio-label">1&nbsp;Day</div>
                 </div>
               </div>
-              <div class="row selected flex-nowrap align-items-center py-2">
+              <div id="7days" class="row time-range selected flex-nowrap align-items-center py-2">
                 <div class="col pr-1">
                   <div class="radio-inline"></div>
                 </div>
@@ -43,7 +43,7 @@
                   <div class="radio-label">7&nbsp;Days</div>
                 </div>
               </div>
-              <div class="row flex-nowrap align-items-center py-2">
+              <div id="30days" class="row time-range flex-nowrap align-items-center py-2">
                 <div class="col pr-1">
                   <div class="radio-inline"></div>
                 </div>
@@ -51,7 +51,7 @@
                   <div class="radio-label">30&nbsp;Days</div>
                 </div>
               </div>
-              <div class="row flex-nowrap align-items-center py-2">
+              <div id="all" class="row time-range flex-nowrap align-items-center py-2">
                 <div class="col pr-1">
                   <div class="radio-inline"></div>
                 </div>
@@ -59,7 +59,7 @@
                   <div class="radio-label">All</div>
                 </div>
               </div>
-              <div class="row flex-nowrap align-items-center py-2">
+              <div id="custom" class="row time-range flex-nowrap align-items-center py-2">
                 <div class="col pr-1">
                   <div class="radio-inline"></div>
                 </div>
@@ -68,10 +68,10 @@
                 </div>
               </div>
             </div>
-            <div class="col flex-fill">
-              <div class="row flex-nowrap align-items-center py-2">
+            <div id="customDetailsDiv" class="col flex-fill d-none">
+              <div class="row flex-nowrap align-items-center pb-2">
                 <div class="col flex-fill cal-heading">Custom Range</div>
-                <div class="col"><button class="btn btn-link text-dark"><i class="fas fa-times fa-lg"></i></button></div>
+                <div class="col"><button id="customClose" class="btn btn-link text-dark"><i class="fas fa-times fa-lg"></i></button></div>
               </div>
               <div class="row flex-nowrap align-items-center pt-2">
                 <div class="col font-weight-bold date-select-label"> From</div>

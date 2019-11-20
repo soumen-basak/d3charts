@@ -2,6 +2,10 @@ body {
     background-color: #f4f5f6;
 }
 
+div {
+    transition: all 0.3s ease;
+}
+
 .axis path, .axis line {
     fill: none;
     stroke: lightgrey;
@@ -26,6 +30,10 @@ body {
     width: 100%;
     height: 100%;
     border-left: 2px solid #9DC449;
+}
+
+.time-range {
+    cursor: pointer;
 }
 
 .radio-label {
@@ -55,6 +63,7 @@ body {
     border: 1px solid #ccc;
     padding: 0.5rem 1rem;
     border-radius: 0.3rem;
+    color: #999;
 }
 
 .date-select-label {
@@ -63,4 +72,9 @@ body {
 
 .cal-heading {
     font-size: 1.2rem;
+}
+
+/* Bootstrap style classes */
+.transparent {
+    opacity: 0 !important;
 }
