@@ -60,6 +60,27 @@ d3.csv("multiLine.csv").then(function (data) {
     var start = data[0].Date;
     var end = data[data.length - 1].Date;
 
+    var fromDate = document.getElementById("fromDate");
+    var toDate = document.getElementById("toDate");
+    fromDate.value = formatDateInput(end);
+    toDate.value = formatDateInput(start);
+    fromDate.setAttribute("min", formatDateInput(end));
+    fromDate.setAttribute("max", toDate.value);
+    toDate.setAttribute("min", fromDate.value);
+    toDate.setAttribute("max", formatDateInput(start));
+
+    fromDate.addEventListener("change", function (ev) {
+        toDate.setAttribute("min", fromDate.value);
+        var timeArr = fromDate.value.split("-");
+        end = new Date(timeArr[2] + " " + monStr[parseInt(timeArr[1]) - 1] + " " + timeArr[0]);
+        updateAxisPlots(start, end);
+    });
+    toDate.addEventListener("change", function (ev) {
+        var timeArr = toDate.value.split("-");
+        start = new Date(timeArr[2] + " " + monStr[parseInt(timeArr[1]) - 1] + " " + timeArr[0]);
+        updateAxisPlots(start, end);
+    });
+
     // Reformat data to make it more copasetic for d3
     // data = An array of objects
     // measurements = An array of three objects, each of which contains an array of objects
@@ -226,21 +247,34 @@ d3.csv("multiLine.csv").then(function (data) {
         return `translate(${(width - this.getBBox().width) / 2},${0})`
     });
 
+    // focus tracking
+    var focus = svg.append('g').style('display', 'none');
+    focus.append('line')
+        .attr('id', 'focusLineX')
+        .attr('class', 'focusLine');
+
     // Create a rect on top of the svg area: this rectangle recovers mouse position
-    svg
-        .append('rect')
+    svg.append('rect')
         .style("fill", "none")
         .style("pointer-events", "all")
         .attr('width', width)
         .attr('height', height)
         .on('mouseover', updatePropVal)
+        .on('mouseout', function () { focus.style('display', 'none'); })
         .on('mousemove', updatePropVal);
 
     var bisectDate = d3.bisector(function (d, x) { return x - d.Date; }).right;
 
     function updatePropVal() {
+        focus.style('display', null);
         var x0 = xScale.invert(d3.mouse(this)[0] || 0);
         var i = bisectDate(data, new Date(x0));
+        var x = xScale(data[i].Date);
+        // update the mouse x-focus
+        focus.select('#focusLineX')
+            .attr('x1', x).attr('y1', yScale(0.00))
+            .attr('x2', x).attr('y2', yScale(1.00));
+        // Update values for properties and time of measurement
         measurements.forEach(function (m) {
             lg.selectAll('.' + m.property)
                 .html(m.property + ": " + Math.round(data[i][m.property] * 100) / 100 + " mm/s");
@@ -293,13 +327,23 @@ d3.csv("multiLine.csv").then(function (data) {
         }
         var dur = this.getAttribute("data-duration");
         if (dur === "custom") {
+            var timeArr = fromDate.value.split("-");
+            end = new Date(timeArr[2] + " " + monStr[parseInt(timeArr[1]) - 1] + " " + timeArr[0]);
+            timeArr = toDate.value.split("-");
+            start = new Date(timeArr[2] + " " + monStr[parseInt(timeArr[1]) - 1] + " " + timeArr[0]);
         } else if (dur === "all") {
             start = data[0].Date;
             end = data[data.length - 1].Date;
         } else {
+            start = data[0].Date;
+            end = data[data.length - 1].Date;
             var duration = parseInt(dur) * 1000 * 3600 * 24;
             end = parseDate(formatDateTime(new Date(start.getTime() - duration)));
         }
+        updateAxisPlots(start, end);
+    };
+
+    function updateAxisPlots(start, end) {
         // Update the axis and text with the new scale
         xScale.domain(
             d3.extent(subset, function (d) {
@@ -330,8 +374,7 @@ d3.csv("multiLine.csv").then(function (data) {
                 }));
             })
             .style("stroke", function (d) { return color(d.property); });
-
-    };
+    }
 
     document.getElementById('customClose').addEventListener('click', function (ev) {
         var customElem = document.getElementById('customDetailsDiv');
@@ -353,6 +396,13 @@ d3.csv("multiLine.csv").then(function (data) {
         var min = date.getMinutes();
         var time = (hrs % 12 < 10 ? "0" + hrs % 12 : hrs % 12) + ":" + (min < 10 ? "0" + min : min) + (hrs >= 12 ? " PM" : " AM");
         return month + ", " + year + " at " + time;
+    }
+    // Format date for input element
+    function formatDateInput(date) {
+        var year = date.getFullYear();
+        var month = parseInt(date.getMonth()) + 1 < 10 ? "0" + parseInt(date.getMonth() + 1) : parseInt(date.getMonth() + 1);
+        var days = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+        return year + "-" + month + "-" + days;
     }
 
 });
