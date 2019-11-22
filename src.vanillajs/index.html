@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>d3 Charts</title>
+  <meta content="Dynamic Charts" name="description">
+  <meta content="d3 Charts" property="og:title">
+  <meta content="width=device-width, initial-scale=1 minimum-scale=1.0, user-scalable=no" name="viewport">
+
+  <!-- <link href="https://fonts.googleapis.com/css?family=Oswald:200,400,600" rel="stylesheet"> -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css">
+  <!-- <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/v4-shims.css"> -->
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link href="/css/style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="body">
+  <div class="container py-4 my-3">
+    <div class="row">
+      <div id="chartWrapper" class="col bg-white py-4 px-0">
+        <svg id="chart"></svg>
+        <div id="calPopup" class="px-4 py-2 bg-white shadow-lg rounded position-absolute transparent invisible">
+          <div class="row flex-nowrap">
+            <div class="col flex-fill">
+              <div id="1day" data-duration="1" class="row time-range flex-nowrap align-items-center py-2">
+                <div class="col pr-1">
+                  <div class="radio-inline"></div>
+                </div>
+                <div class="col flex-fill">
+                  <div class="radio-label">1&nbsp;Day</div>
+                </div>
+              </div>
+              <div id="2days" data-duration="2" class="row time-range flex-nowrap align-items-center py-2">
+                <div class="col pr-1">
+                  <div class="radio-inline"></div>
+                </div>
+                <div class="col flex-fill">
+                  <div class="radio-label">2&nbsp;Days</div>
+                </div>
+              </div>
+              <div id="5days" data-duration="5" class="row time-range flex-nowrap align-items-center py-2">
+                <div class="col pr-1">
+                  <div class="radio-inline"></div>
+                </div>
+                <div class="col flex-fill">
+                  <div class="radio-label">5&nbsp;Days</div>
+                </div>
+              </div>
+              <div id="all" data-duration="all" class="row time-range selected flex-nowrap align-items-center py-2">
+                <div class="col pr-1">
+                  <div class="radio-inline"></div>
+                </div>
+                <div class="col flex-fill">
+                  <div class="radio-label">All</div>
+                </div>
+              </div>
+              <div id="custom" data-duration="custom" class="row time-range flex-nowrap align-items-center py-2">
+                <div class="col pr-1">
+                  <div class="radio-inline"></div>
+                </div>
+                <div class="col flex-fill">
+                  <div class="radio-label">Custom</div>
+                </div>
+              </div>
+            </div>
+            <div id="customDetailsDiv" class="col flex-fill d-none">
+              <div class="row flex-nowrap align-items-center pb-2">
+                <div class="col flex-fill cal-heading">Custom Range</div>
+                <div class="col"><button id="customClose" class="btn btn-link text-dark"><i class="fas fa-times fa-lg"></i></button></div>
+              </div>
+              <div class="row flex-nowrap align-items-center pt-2">
+                <div class="col font-weight-bold date-select-label"> From</div>
+              </div>
+              <div class="row flex-nowrap align-items-center pt-1 pb-2">
+                <div class="col"> 
+                  <input id="fromDate" type="date" class="date-select">
+                </div>
+              </div>
+              <div class="row flex-nowrap align-items-center pt-2">
+                <div class="col font-weight-bold date-select-label"> To</div>
+              </div>
+              <div class="row flex-nowrap align-items-center pt-1 pb-2">
+                <div class="col"> 
+                  <input id="toDate" type="date" class="date-select">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="/js/index.js" type="text/javascript"></script>
+
+</body>
+
+</html>
