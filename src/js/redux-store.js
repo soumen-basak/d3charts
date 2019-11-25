@@ -19,12 +19,23 @@ function toggleChartMenu() {
         type: TOGGLE_CHART_MENU
     };
 }
+function openCustomMenu() {
+    return {
+        type: OPEN_CUSTOM_MENU
+    };
+}
+function closeCustomMenu() {
+    return {
+        type: CLOSE_CUSTOM_MENU
+    };
+}
 
 var initialState = {
     selectedRange: {
         id: "all"
     },
-    chartMenuOpen: false
+    chartMenuOpen: false,
+    customMenuOpen: false
 };
 
 function reducer() {
@@ -54,9 +65,44 @@ function reducer() {
                     chartMenuOpen: true
                 });
             }
+        case OPEN_CUSTOM_MENU:
+            return Object.assign({}, state, {
+                customMenuOpen: true
+            });
+        case CLOSE_CUSTOM_MENU:
+            return Object.assign({}, state, {
+                customMenuOpen: false
+            });
         default:
             return state;
     }
 }
 
 var store = createStore(reducer, initialState);
+
+// Create a wrapper over store.subscribe to respond to changes to specific state changes
+function observeStore(store, select, onChange) {
+    var currentState = void 0;
+
+    function handleChange() {
+        var nextState = select(store.getState());
+        if (nextState !== currentState) {
+            currentState = nextState;
+            onChange(currentState);
+        }
+    }
+
+    var unsubscribe = store.subscribe(handleChange);
+    handleChange();
+    return unsubscribe;
+}
+// select functions for observeStore
+function stateRangeId(state) {
+    return state.selectedRange.id;
+}
+function stateChartMenuOpen(state) {
+    return state.chartMenuOpen;
+}
+function stateCustomMenuOpen(state) {
+    return state.customMenuOpen;
+}

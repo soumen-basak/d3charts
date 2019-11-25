@@ -23,9 +23,8 @@ var TimeRangeSelect = function (_React$Component) {
         value: function componentDidMount() {
             var _this2 = this;
 
-            store.subscribe(function () {
-                var storeState = store.getState();
-                if (storeState.selectedRange.id === _this2.props.idstr) {
+            observeStore(store, stateRangeId, function (id) {
+                if (id === _this2.props.idstr) {
                     _this2.setState({ selected: true });
                 } else {
                     _this2.setState({ selected: false });
@@ -37,10 +36,19 @@ var TimeRangeSelect = function (_React$Component) {
         value: function render() {
             var _this3 = this;
 
+            function handleTimeRangeClick(id) {
+                store.dispatch(selectTimeRange(id));
+                if (id === "custom") {
+                    store.dispatch(openCustomMenu());
+                } else {
+                    store.dispatch(closeCustomMenu());
+                }
+            }
+
             return React.createElement(
                 Row,
                 { id: this.props.idstr, onClick: function onClick() {
-                        return store.dispatch(selectTimeRange(_this3.props.idstr));
+                        return handleTimeRangeClick(_this3.props.idstr);
                     }, 'data-duration': this.props.duration, className: (this.state.selected ? 'selected' : '') + " time-range flex-nowrap align-items-center py-2" },
                 React.createElement(
                     Col,

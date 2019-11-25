@@ -14,7 +14,10 @@ var TimeRangeMenu = function (_React$Component) {
 
         var _this = _possibleConstructorReturn(this, (TimeRangeMenu.__proto__ || Object.getPrototypeOf(TimeRangeMenu)).call(this, props));
 
-        _this.state = { opened: false };
+        _this.state = {
+            opened: false,
+            customMenuOpen: false
+        };
         return _this;
     }
 
@@ -23,13 +26,15 @@ var TimeRangeMenu = function (_React$Component) {
         value: function componentDidMount() {
             var _this2 = this;
 
-            store.subscribe(function () {
-                var storeState = store.getState();
-                if (storeState.chartMenuOpen) {
-                    _this2.setState({ opened: true });
-                } else {
-                    _this2.setState({ opened: false });
-                }
+            observeStore(store, stateChartMenuOpen, function (chartMenuOpen) {
+                _this2.setState({
+                    opened: chartMenuOpen
+                });
+            });
+            observeStore(store, stateCustomMenuOpen, function (customMenuOpen) {
+                _this2.setState({
+                    customMenuOpen: customMenuOpen
+                });
             });
         }
     }, {
@@ -54,7 +59,7 @@ var TimeRangeMenu = function (_React$Component) {
                         ),
                         React.createElement(
                             Col,
-                            { id: "customDetailsDiv", className: "flex-fill d-none" },
+                            { id: "customDetailsDiv", className: "flex-fill " + (this.state.customMenuOpen ? "" : "disappear") },
                             React.createElement(
                                 Row,
                                 { className: "flex-nowrap align-items-center pb2" },
@@ -68,7 +73,9 @@ var TimeRangeMenu = function (_React$Component) {
                                     { className: "" },
                                     React.createElement(
                                         Button,
-                                        { id: "customClose", variant: "link", className: "text-dark" },
+                                        { id: "customClose", onClick: function onClick() {
+                                                return store.dispatch(closeCustomMenu());
+                                            }, variant: "link", className: "text-dark" },
                                         React.createElement("i", { className: "fas fa-times fa-lg" })
                                     )
                                 )

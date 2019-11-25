@@ -5,9 +5,8 @@ class TimeRangeSelect extends React.Component {
     }
 
     componentDidMount() {
-        store.subscribe(() => {
-            let storeState = store.getState();
-            if (storeState.selectedRange.id === this.props.idstr) {
+        observeStore(store, stateRangeId, (id) => {
+            if (id === this.props.idstr) {
                 this.setState({ selected: true });
             } else {
                 this.setState({ selected: false });
@@ -16,8 +15,17 @@ class TimeRangeSelect extends React.Component {
     }
 
     render() {
+        function handleTimeRangeClick(id) {
+            store.dispatch(selectTimeRange(id));
+            if (id === "custom") {
+                store.dispatch(openCustomMenu());
+            } else {
+                store.dispatch(closeCustomMenu());
+            }
+        }
+
         return (
-            <Row id={this.props.idstr} onClick={() => store.dispatch(selectTimeRange(this.props.idstr))} data-duration={this.props.duration} className={(this.state.selected ? 'selected' : '') + " time-range flex-nowrap align-items-center py-2"}>
+            <Row id={this.props.idstr} onClick={() => handleTimeRangeClick(this.props.idstr)} data-duration={this.props.duration} className={(this.state.selected ? 'selected' : '') + " time-range flex-nowrap align-items-center py-2"}>
                 <Col className="pr-1">
                     <div className="radio-inline"></div>
                 </Col>

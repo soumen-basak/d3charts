@@ -210,22 +210,11 @@ var Chart = function (_React$Component) {
                 }
 
                 // Handle clicks on time range to display in graph
-                var trangeElems = document.getElementsByClassName('time-range');
-                var handleCustomTimeRangeClick = function handleCustomTimeRangeClick(ev) {
-                    document.querySelector('.time-range.selected').classList.remove('selected');
-                    this.classList.add('selected');
-                    var customElem = document.getElementById('customDetailsDiv');
-                    var popupElem = document.getElementById('calPopup');
-                    if (this.getAttribute('id') === 'custom') {
-                        customElem.classList.remove('d-none');
-                        var rectCustom = customElem.getBoundingClientRect();
-                        popupElem.style.left = parseInt(popupElem.style.left.replace(/px/, "")) - rectCustom.width + "px";;
-                    } else {
-                        var rectCustom = customElem.getBoundingClientRect();
-                        customElem.classList.add('d-none');
-                        popupElem.style.left = parseInt(popupElem.style.left.replace(/px/, "")) + rectCustom.width + "px";;
-                    }
-                    var dur = this.getAttribute("data-duration");
+                observeStore(store, stateRangeId, handleCustomTimeRangeClick);
+
+                function handleCustomTimeRangeClick(id) {
+                    var elem = document.getElementById(id);
+                    var dur = elem.getAttribute("data-duration");
                     if (dur === "custom") {
                         var timeArr = fromDate.value.split("-");
                         end = new Date(timeArr[2] + " " + monStr[parseInt(timeArr[1]) - 1] + " " + timeArr[0]);
@@ -265,18 +254,6 @@ var Chart = function (_React$Component) {
                         return color(d.property);
                     });
                 }
-
-                document.getElementById('customClose').addEventListener('click', function (ev) {
-                    var customElem = document.getElementById('customDetailsDiv');
-                    var popupElem = document.getElementById('calPopup');
-                    var rectCustom = customElem.getBoundingClientRect();
-                    customElem.classList.add('d-none');
-                    popupElem.style.left = parseInt(popupElem.style.left.replace(/px/, "")) + rectCustom.width + "px";;
-                });
-
-                [].forEach.call(trangeElems, function (trange) {
-                    trange.addEventListener('click', handleCustomTimeRangeClick);
-                });
 
                 // Format Date for display of date/time at cursor
                 function formatDate(date) {
