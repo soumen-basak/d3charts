@@ -15,7 +15,6 @@ class TimeRangeMenu extends React.Component {
         });
     }
 
-
     render() {
         return (
             // <div className="px-4 py-2 bg-white shadow-lg rounded position-absolute transparent invisible">
