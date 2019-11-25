@@ -100,7 +100,7 @@ var Chart = function (_React$Component) {
                     updateAxisPlots(start, end);
                 });
 
-                // Reformat data to make it more copasetic for d3
+                // Reformat data 
                 // data = An array of objects
                 // measurements = An array of three objects, each of which contains an array of objects
                 var measurements = measurementProperties.map(function (property) {
@@ -208,9 +208,6 @@ var Chart = function (_React$Component) {
                         ddisp.selectAll('.ddisp-text').html(formatDate(data[i].Date));
                     });
                 }
-
-                console.log(measurements); // to view the structure
-                console.log(data); // to view the structure
 
                 // Handle clicks on time range to display in graph
                 var trangeElems = document.getElementsByClassName('time-range');
