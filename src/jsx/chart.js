@@ -9,13 +9,9 @@ class Chart extends React.Component {
     }
 
     drawChart() {
-        // Define some constants
-        var monStr = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
         // Define margins
-        var margin = { top: 80, right: 50, bottom: 30, left: 100 },
-            width = parseInt(d3.select("#chart").style("width")) - margin.left - margin.right,
-            height = parseInt(d3.select("#chart").style("height")) - margin.top - margin.bottom;
+        var width = parseInt(d3.select("#chart").style("width")) - margin.left - margin.right;
+        var height = parseInt(d3.select("#chart").style("height")) - margin.top - margin.bottom;
 
         // Define date parser
         var parseDate = d3.timeParse("%Y-%m-%d %H:%M:%S");
@@ -133,39 +129,6 @@ class Chart extends React.Component {
                 .attr('font-weight', 'bold')
                 .style("text-anchor", "beginning")
                 .text("Trend");
-
-            // Add icon
-            svg.append("text")
-                .attr("x", width)
-                .attr("y", 20 - margin.top)
-                .attr("class", "fas fa-ellipsis-v")
-                .attr("fill", "#999")
-                .attr("font-size", "0.8rem")
-                .style("text-anchor", "end")
-                .text(function (d) { return '\uf142\uf142' });
-            svg.append("text")
-                .attr("x", width - 30)
-                .attr("y", 20 - margin.top)
-                .attr("class", "fas fa-expand")
-                .attr("fill", "#999")
-                .style("text-anchor", "end")
-                .text(function (d) { return '\uf065' });
-            svg.append("text")
-                .attr("x", width - 63)
-                .attr("y", 20 - margin.top)
-                .attr("class", "fas fa-ellipsis-v")
-                .attr("fill", "#999")
-                .style("text-anchor", "end")
-                .text(function (d) { return '\uf142' });
-            svg.append("text")
-                .attr("x", width - 90)
-                .attr("y", 20 - margin.top)
-                .attr("class", "far fa-calendar")
-                .attr("fill", "#999")
-                .attr('cursor', 'pointer')
-                .style("text-anchor", "end")
-                .text(function (d) { return '\uf133' })
-                .on('click', handleCalendarClick);
 
             // Place the axes on the chart
             svg.append("g")
@@ -296,29 +259,6 @@ class Chart extends React.Component {
 
             console.log(measurements); // to view the structure
             console.log(data); // to view the structure
-
-            // Handle click on Calendar icon to change x axis time period
-            function handleCalendarClick() {
-                var popupElem = document.getElementById('calPopup');
-                var chartElem = document.getElementById('chartWrapper');
-                var rectIcon = this.getBoundingClientRect();
-                var rectPopup = popupElem.getBoundingClientRect();
-                var rectChart = chartElem.getBoundingClientRect();
-                popupElem.style.top = parseInt(rectIcon.top - rectChart.top + rectIcon.height + 10) + 'px';
-                popupElem.style.left = parseInt(rectIcon.right - rectChart.left - rectPopup.width) + 'px';
-                popupElem.classList.toggle('invisible');
-                popupElem.classList.toggle('transparent');
-            };
-
-            window.addEventListener('click', function (e) {
-                var popupElem = document.getElementById('calPopup');
-                if (!e.target.classList.contains('fa-calendar')) {
-                    if (!popupElem.contains(e.target)) {
-                        popupElem.classList.add('invisible');
-                        popupElem.classList.add('transparent');
-                    }
-                }
-            });
 
             // Handle clicks on time range to display in graph
             var trangeElems = document.getElementsByClassName('time-range');
